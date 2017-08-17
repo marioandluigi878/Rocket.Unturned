@@ -10,19 +10,19 @@ namespace Rocket.Unturned
     public class UnturnedConsole : MonoBehaviour
     {
         FileStream fileStream = null;
+        StreamWriter streamWriter = null;
+        UnturnedConsoleWriter writer = null;
         private void Awake()
         {
             try
             {
                 fileStream = new FileStream(String.Format(Environment.ConsoleFile, Dedicator.serverID), FileMode.Create,FileAccess.Write,FileShare.ReadWrite);
-
-                StreamWriter streamWriter = new StreamWriter(fileStream, System.Text.Encoding.ASCII)
+              
+                streamWriter = new StreamWriter(fileStream, System.Text.Encoding.UTF8)
                 {
                     AutoFlush = true
                 };
-
-
-                System.Console.SetOut(streamWriter);
+                writer = new UnturnedConsoleWriter(streamWriter);
 
                 readingThread = new Thread(new ThreadStart(DoRead));
                 readingThread.Start();
@@ -33,11 +33,22 @@ namespace Rocket.Unturned
             }
         }
 
-        private void Destroy() {
+        private void Destroy()
+        {
             if (fileStream != null)
             {
                 fileStream.Close();
                 fileStream.Dispose();
+            }
+            if (streamWriter != null)
+            {
+                streamWriter.Close();
+                streamWriter.Dispose();
+            }
+            if (writer != null)
+            {
+                writer.Close();
+                writer.Dispose();
             }
         }
 
